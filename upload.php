@@ -48,6 +48,23 @@ if ($file['error'] !== UPLOAD_ERR_OK) {
     exit;
 }
 
+// Lista de tipos permitidos (MIME types)
+$allowedTypes = [
+    'text/plain',       // TXT
+    'application/json', // JSON, se quiser permitir
+    // adicione outros tipos confiáveis aqui
+];
+
+// Criar objeto fileinfo
+$finfo = new finfo(FILEINFO_MIME_TYPE);
+$mimeType = $finfo->file($file['tmp_name']);
+
+if (!in_array($mimeType, $allowedTypes)) {
+    http_response_code(415); // Unsupported Media Type
+    echo json_encode(['error' => 'Invalid file type']);
+    exit;
+}
+
 // Segurança básica: limitar tipos/size (opcional)
 $maxBytes = 5 * 1024 * 1024; // 5 MB, ajuste conforme necessário
 if ($file['size'] > $maxBytes) {
